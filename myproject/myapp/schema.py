@@ -16,12 +16,16 @@ class CreateUser(graphene.Mutation):
         password = graphene.String(required=True)
     
     user = graphene.Field(UserType)
+    message = graphene.String()
 
     def mutate(self, info, username, email, password):
+        user = info.context.user
+        if not user.is_authenticated:
+            raise Exception('Authorization is required')
         user = User(username=username, email=email)
         user.set_password(password)
         user.save()
-        return CreateUser(user=user)
+        return CreateUser(user=user, message = 'user created successfully')
     
 class ObtainJSONWebToken(graphene.Mutation):
     token = graphene.String()
